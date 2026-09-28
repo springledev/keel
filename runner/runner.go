@@ -35,7 +35,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/daniel/keel/secret"
+	"github.com/springledev/keel/secret"
 )
 
 // defaultStderrCap is the default number of stderr bytes retained per
