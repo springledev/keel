@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/daniel/keel/secret"
+	"github.com/springledev/keel/secret"
 )
 
 // TestHelperProcess is not a test: it is the fake external command the
