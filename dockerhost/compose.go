@@ -42,6 +42,9 @@ type ComposeProject struct {
 	// Services are the compose service names running in the project
 	// (e.g. "db", "web"), sorted and deduplicated.
 	Services []string `json:"services,omitempty"`
+	// Source says how the project was found: ComposeSourceLabels,
+	// ComposeSourceScan or ComposeSourceRegistered.
+	Source string `json:"source,omitempty"`
 	// Containers are the project's containers, for the compose
 	// strategy's labels snapshot. Deliberately excludes environment
 	// variables (docker inspect's Config.Env commonly carries secrets
@@ -98,7 +101,7 @@ func ListComposeProjects(ctx context.Context, r *runner.Runner, d Docker) ([]Com
 		}
 		p, ok := byName[name]
 		if !ok {
-			p = &ComposeProject{Name: name, WorkingDir: labels[composeWorkingDirLabel]}
+			p = &ComposeProject{Name: name, WorkingDir: labels[composeWorkingDirLabel], Source: ComposeSourceLabels}
 			if cf := labels[composeConfigFilesLabel]; cf != "" {
 				p.ConfigFiles = strings.Split(cf, ",")
 			}

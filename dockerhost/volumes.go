@@ -72,19 +72,26 @@ func ListVolumes(ctx context.Context, r *runner.Runner, d Docker) ([]Volume, err
 }
 
 // parseLabels parses the docker CLI's "k=v,k=v" label string into a
-// map. A label with no "=" is ignored (should not happen in practice,
-// but a malformed label must never crash the picker).
+// map. A piece with no "=" is the rest of the previous value, whose own
+// comma the CLI could not escape (Compose's config_files label lists
+// several -f files separated by commas); with no previous label it is
+// ignored, so a malformed string never crashes the picker.
 func parseLabels(s string) map[string]string {
 	out := map[string]string{}
 	if s == "" {
 		return out
 	}
+	lastKey := ""
 	for _, kv := range strings.Split(s, ",") {
 		k, v, ok := strings.Cut(kv, "=")
 		if !ok {
+			if lastKey != "" {
+				out[lastKey] += "," + kv
+			}
 			continue
 		}
 		out[k] = v
+		lastKey = k
 	}
 	return out
 }

@@ -25,6 +25,7 @@ exit 0
 	}
 	want := []ComposeProject{
 		{
+			Source:      "labels",
 			Name:        "immich",
 			WorkingDir:  "/opt/immich",
 			ConfigFiles: []string{"/opt/immich/docker-compose.yml"},
@@ -45,6 +46,7 @@ exit 0
 			},
 		},
 		{
+			Source:      "labels",
 			Name:        "other",
 			WorkingDir:  "/opt/other",
 			ConfigFiles: []string{"/opt/other/compose.yaml"},
