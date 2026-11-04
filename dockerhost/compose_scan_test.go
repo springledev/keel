@@ -2,6 +2,8 @@ package dockerhost
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -75,6 +77,55 @@ func TestScanComposeDirsFailureHasContext(t *testing.T) {
 	_, err := ScanComposeDirs(context.Background(), &runner.Runner{}, d, "alpine", []string{"/nope"}, false, ComposeSourceRegistered)
 	if err == nil || !strings.Contains(err.Error(), "/nope") {
 		t.Errorf("error = %v, want it to name the folder", err)
+	}
+}
+
+// TestScanComposeDirsRemovesFailedHelper: a failed scan removes its
+// helper and the helper's anonymous volumes, and a failed removal is
+// reported alongside the original failure instead of replacing it.
+func TestScanComposeDirsRemovesFailedHelper(t *testing.T) {
+	tests := []struct {
+		name    string
+		rmExit  string
+		wantErr []string
+		notErr  string
+	}{
+		{name: "removal succeeds", rmExit: "0", wantErr: []string{"/nope", "scan boom"}, notErr: "could not be removed"},
+		{name: "removal fails", rmExit: "1", wantErr: []string{"/nope", "scan boom", "could not be removed", "rm boom"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logPath := filepath.Join(t.TempDir(), "log")
+			d := stubDocker(t, `printf '%s\n' "$*" >> '`+logPath+`'
+if [ "$1" = rm ]; then
+  [ `+tt.rmExit+` = 0 ] || echo "rm boom" >&2
+  exit `+tt.rmExit+`
+fi
+echo "scan boom" >&2
+exit 1
+`)
+			_, err := ScanComposeDirs(context.Background(), &runner.Runner{}, d, "alpine", []string{"/nope"}, false, ComposeSourceRegistered)
+			if err == nil {
+				t.Fatal("ScanComposeDirs succeeded, want the scan failure")
+			}
+			for _, want := range tt.wantErr {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("error = %v, want it to contain %q", err, want)
+				}
+			}
+			if tt.notErr != "" && strings.Contains(err.Error(), tt.notErr) {
+				t.Errorf("error = %v, must not contain %q", err, tt.notErr)
+			}
+			data, readErr := os.ReadFile(logPath)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+			last := lines[len(lines)-1]
+			if !strings.HasPrefix(last, "rm -f --volumes ballast-compose-scan-") {
+				t.Errorf("last docker invocation = %q, want removal with --volumes", last)
+			}
+		})
 	}
 }
 
