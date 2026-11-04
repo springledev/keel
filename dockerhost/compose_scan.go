@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/springledev/keel/runner"
 )
@@ -110,6 +111,23 @@ func ScanComposeDirs(ctx context.Context, r *runner.Runner, d Docker, helperImag
 	return out, nil
 }
 
+// scanHelperCleanupTimeout bounds removing a failed scan's helper
+// container, so an unreachable Docker host cannot hang the caller.
+const scanHelperCleanupTimeout = 30 * time.Second
+
+// removeScanHelper force-removes a failed scan's helper, on a fresh
+// context because the scan's own may be why it failed. --volumes matters
+// because removing the container here bypasses --rm's own volume
+// cleanup, which would leak an anonymous volume if the helper image
+// declares one. A helper that is already gone is not an error: docker
+// rm -f exits 0.
+func removeScanHelper(r *runner.Runner, d Docker, helper string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), scanHelperCleanupTimeout)
+	defer cancel()
+	_, err := r.Run(ctx, nil, nil, d.Command(nil, "rm", "-f", "--volumes", helper))
+	return err
+}
+
 // scanOneComposeDir returns, per relative sub-folder ("." for dir
 // itself), the candidate compose filenames present.
 func scanOneComposeDir(ctx context.Context, r *runner.Runner, d Docker, helperImage, dir string, children bool) (map[string][]string, error) {
@@ -130,7 +148,9 @@ exit 0`
 	var buf bytes.Buffer
 	res, err := r.Run(ctx, nil, &buf, d.Command(nil, args...))
 	if err != nil {
-		_, _ = r.Run(context.Background(), nil, nil, d.Command(nil, "rm", "-f", helper))
+		if rmErr := removeScanHelper(r, d, helper); rmErr != nil {
+			err = fmt.Errorf("%w (the helper container %s could not be removed either: %v)", err, helper, rmErr)
+		}
 		if hint := Hint(err, res.Stderr); hint != "" {
 			return nil, fmt.Errorf("%s: %w", hint, err)
 		}
