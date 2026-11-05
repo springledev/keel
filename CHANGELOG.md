@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.4.1 - 2026-11-05
+
+- The `v0.4.0` tag was pushed on the wrong commit (the `v0.3.1` one), so it holds none of the v0.4.0 changes below. Use `v0.4.1` or later; `v0.4.1` contains everything listed under `v0.4.0` and this release.
 - Lint fixes. **Behavior change:** four `proxmox` error messages no longer start with a capital letter: `the Proxmox API rejected the token (HTTP <n>) - ...`, `the Proxmox API request to <path> failed ...`, `the Proxmox connection <host>: no API token is configured` and `the Proxmox API token: <reason>`. Code that matches the old text (Ballast does, to add its own hint on a rejected token) must be updated when it moves to the release that includes this.
 
 ## v0.4.0 - 2026-11-05
