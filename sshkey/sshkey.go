@@ -1,7 +1,6 @@
 // Package sshkey validates SSH private keys that a program will use
-// unattended. It was moved from Ballast's backend package (the SSH
-// branch of RenderCredentials) so that dockerhost no longer depends on
-// Ballast's backup code.
+// unattended. It has no dependencies on any
+// particular product, so other packages (such as dockerhost) can share it.
 package sshkey
 
 import (

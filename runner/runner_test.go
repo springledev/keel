@@ -97,7 +97,7 @@ func TestHelperProcess(t *testing.T) {
 		}
 		time.Sleep(time.Duration(helperInt(args[1])) * time.Second)
 		os.Exit(0)
-	case "spawner": // spawner <path> <seconds>: run "pidfile" through a Runner, like Ballast running restic
+	case "spawner": // spawner <path> <seconds>: run "pidfile" through a Runner, like a program running a long command
 		r := &Runner{}
 		if _, err := r.Run(context.Background(), nil, nil, helperCommand("pidfile", args...)); err != nil {
 			fmt.Fprintln(os.Stderr, "spawner:", err)
@@ -373,11 +373,11 @@ func TestPipelineCancellation(t *testing.T) {
 
 func TestRunStartFailure(t *testing.T) {
 	r := &Runner{}
-	_, err := r.Run(context.Background(), nil, nil, Command{Name: "ballast-no-such-binary-xyz"})
+	_, err := r.Run(context.Background(), nil, nil, Command{Name: "keel-no-such-binary-xyz"})
 	if err == nil {
 		t.Fatal("Run of a missing binary must fail")
 	}
-	if !strings.Contains(err.Error(), "ballast-no-such-binary-xyz") {
+	if !strings.Contains(err.Error(), "keel-no-such-binary-xyz") {
 		t.Errorf("error = %q, want it to name the missing program", err)
 	}
 }
@@ -390,11 +390,11 @@ func TestPipelineStartFailureKillsStartedStages(t *testing.T) {
 	start := time.Now()
 	_, err := r.Pipeline(context.Background(), nil, nil,
 		helperCommand("sleeper", "30"),
-		Command{Name: "ballast-no-such-binary-xyz"})
+		Command{Name: "keel-no-such-binary-xyz"})
 	if err == nil {
 		t.Fatal("Pipeline must fail when a stage cannot start")
 	}
-	if !strings.Contains(err.Error(), "ballast-no-such-binary-xyz") {
+	if !strings.Contains(err.Error(), "keel-no-such-binary-xyz") {
 		t.Errorf("error = %q, want it to name the stage that failed to start", err)
 	}
 	if elapsed := time.Since(start); elapsed > 10*time.Second {
@@ -453,14 +453,14 @@ func TestPipelineRejectsMalformedEnv(t *testing.T) {
 
 func TestRunEnvPassing(t *testing.T) {
 	r := &Runner{}
-	c := helperCommand("env", "BALLAST_TEST_VAR")
-	c.Env = append(c.Env, "BALLAST_TEST_VAR=hello-env")
+	c := helperCommand("env", "KEEL_TEST_VAR")
+	c.Env = append(c.Env, "KEEL_TEST_VAR=hello-env")
 	res, err := r.Run(context.Background(), nil, nil, c)
 	if err != nil {
 		t.Fatalf("Run: %v", err)
 	}
 	if strings.TrimSpace(string(res.Stdout)) != "hello-env" {
-		t.Errorf("child saw BALLAST_TEST_VAR=%q, want %q", res.Stdout, "hello-env")
+		t.Errorf("child saw KEEL_TEST_VAR=%q, want %q", res.Stdout, "hello-env")
 	}
 }
 

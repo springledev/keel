@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-// TestChildDiesWhenBallastIsKilled SIGKILLs a process that is running
-// a command through a Runner, the way a crashed or OOM-killed Ballast
+// TestChildDiesWhenParentIsKilled SIGKILLs a process that is running
+// a command through a Runner, the way a crashed or OOM-killed host program
 // would be, and checks that the command dies with it instead of
 // carrying on as an orphan.
-func TestChildDiesWhenBallastIsKilled(t *testing.T) {
+func TestChildDiesWhenParentIsKilled(t *testing.T) {
 	pidPath := filepath.Join(t.TempDir(), "child.pid")
 	c := helperCommand("spawner", pidPath, "60")
 	parent := exec.Command(c.Name, c.Args...)

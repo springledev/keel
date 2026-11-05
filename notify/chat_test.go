@@ -33,7 +33,7 @@ func TestChatChannels(t *testing.T) {
 			if ch.Type() != tt.name {
 				t.Errorf("Type = %q", ch.Type())
 			}
-			ev := Event{Service: "hull", Message: "drift", Detail: "extra rule", Title: "T"}
+			ev := Event{Service: "example", Message: "drift", Detail: "extra rule", Title: "T"}
 			if err := ch.Send(context.Background(), ev); err != nil {
 				t.Fatal(err)
 			}
@@ -58,7 +58,7 @@ func TestChatChannels(t *testing.T) {
 }
 
 func TestWebhookSignatureHeader(t *testing.T) {
-	for _, hdr := range []string{"", "X-Hull-Signature"} {
+	for _, hdr := range []string{"", "X-Example-Signature"} {
 		var gotBody []byte
 		var r0 *http.Request
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -88,10 +88,10 @@ func TestNtfyExplicitTitle(t *testing.T) {
 	var title string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { title = r.Header.Get("Title") }))
 	defer srv.Close()
-	if err := NewNtfyChannel(srv.URL).Send(context.Background(), Event{Service: "s", Title: "Hull test notification"}); err != nil {
+	if err := NewNtfyChannel(srv.URL).Send(context.Background(), Event{Service: "s", Title: "Example test notification"}); err != nil {
 		t.Fatal(err)
 	}
-	if title != "Hull test notification" {
+	if title != "Example test notification" {
 		t.Errorf("title = %q", title)
 	}
 }

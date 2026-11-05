@@ -21,10 +21,14 @@ const RequestTimeout = 30 * time.Second
 // the credential store; the zero value is only useful in tests that
 // set every field directly.
 type Client struct {
-	Host        string
-	TokenID     string
+	// Host is the "https://host:port" base URL of the Proxmox host
+	Host string
+	// TokenID is the API token ID, "user@realm!tokenname"
+	TokenID string
+	// TokenSecret is the API token secret; never log it
 	TokenSecret string
-	HTTPClient  *http.Client
+	// HTTPClient is the HTTP client used for requests; nil means a default client
+	HTTPClient *http.Client
 }
 
 // newInsecureCapableClient builds the http.Client a Resolver hands to

@@ -352,7 +352,7 @@ func TestNotifier_UnregisteredService(t *testing.T) {
 }
 
 // TestNotifier_Resolve: a service with no channel registered up front
-// (e.g. one added from the web UI after `ballast serve` started) is
+// (e.g. one added from the web UI after the program started) is
 // looked up at send time, and a lookup failure or empty result is
 // reported, never treated as delivered.
 func TestNotifier_Resolve(t *testing.T) {

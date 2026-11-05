@@ -34,11 +34,16 @@ const (
 // EmailSettings are an email channel's non-secret settings. The
 // password lives in the channel's token credential file.
 type EmailSettings struct {
-	Host     string   `json:"host"`
-	Port     int      `json:"port"`
-	Security string   `json:"security"`
-	From     string   `json:"from"`
-	To       []string `json:"to"`
+	// Host is the mail server address
+	Host string `json:"host"`
+	// Port is the mail server port
+	Port int `json:"port"`
+	// Security selects plain, STARTTLS or implicit TLS
+	Security string `json:"security"`
+	// From is the sender address
+	From string `json:"from"`
+	// To lists the recipient addresses
+	To []string `json:"to"`
 }
 
 // Validate checks the settings are complete enough to send with.
@@ -66,9 +71,10 @@ func (s EmailSettings) Validate() error {
 // EmailChannel delivers events as plain-text email over SMTP.
 type EmailChannel struct {
 	EmailSettings
+	// Username is the login name for the mail server; empty means no login
 	Username string
 	Password string // from the credential store; never logged
-	// Product prefixes the subject line, e.g. "Hull" gives "[Hull] ...".
+	// Product prefixes the subject line, e.g. "Example" gives "[Example] ...".
 	Product string
 	// TLSConfig is injected by tests; nil uses the host's name.
 	TLSConfig *tls.Config

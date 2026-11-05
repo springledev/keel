@@ -21,12 +21,12 @@ Or use `make vet`, `make test` and `make lint`.
 - **Use conventional commit messages**, such as `feat:`, `fix:`, `test:` and `docs:`.
 - **Add a `CHANGELOG.md` entry** for anything a consumer would notice, including breaking changes.
 
-## Developing alongside Ballast or Hull
+## Developing alongside a consuming product
 
 To test Keel changes inside a product before a release, create a local workspace file. It is not committed, so it will not affect anyone else:
 
 ```
-go work init . ../ballast
+go work init . ../yourproduct
 ```
 
 The `go.work` file is already in `.gitignore`. Do not add a `replace` directive to `go.mod`.

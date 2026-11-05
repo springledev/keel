@@ -1,5 +1,5 @@
-// Package notify is the domain-free notification half shared by Ballast
-// and Hull: the Channel interface, a per-service Notifier, and ntfy,
+// Package notify is the domain-free notification half shared by
+// programs that need alerts: the Channel interface, a per-service Notifier, and ntfy,
 // generic webhook, Discord, Slack and email channels.
 //
 // IMPORTANT: Channel secrets (ntfy topic URL, webhook URL) must never
@@ -46,7 +46,7 @@ type Event struct {
 	// Timestamp is when the event occurred.
 	Timestamp time.Time
 	// Title, when set, is the headline channels show instead of a
-	// generated one (e.g. "Hull test notification").
+	// generated one (e.g. "Example test notification").
 	Title string
 }
 
@@ -94,7 +94,8 @@ type NtfyChannel struct {
 	// Secret is the optional access credential for a protected ntfy
 	// server, from the credential store: a bearer token, or — when
 	// Username is set — that user's password.
-	Secret   string
+	Secret string
+	// Username is the optional ntfy login name
 	Username string
 	Client   *http.Client // injected for tests; nil defaults to clientWithTimeout()
 }

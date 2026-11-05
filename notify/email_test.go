@@ -82,8 +82,8 @@ func TestEmailChannelSend(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			port, got := fakeSMTP(t, tt.rejectAuth)
 			e := &EmailChannel{
-				EmailSettings: EmailSettings{Host: "127.0.0.1", Port: port, Security: EmailSecurityNone, From: "ballast@example.com", To: []string{"me@example.com"}},
-				Username:      "me", Password: tt.password, Product: "Ballast",
+				EmailSettings: EmailSettings{Host: "127.0.0.1", Port: port, Security: EmailSecurityNone, From: "app@example.com", To: []string{"me@example.com"}},
+				Username:      "me", Password: tt.password, Product: "Example",
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
@@ -101,7 +101,7 @@ func TestEmailChannelSend(t *testing.T) {
 				t.Fatalf("Send: %v", err)
 			}
 			seen := <-got
-			for _, want := range []string{"MAIL FROM:<ballast@example.com>", "RCPT TO:<me@example.com>", "Subject: [Ballast] immich backup failed", "disk full"} {
+			for _, want := range []string{"MAIL FROM:<app@example.com>", "RCPT TO:<me@example.com>", "Subject: [Example] immich backup failed", "disk full"} {
 				if !strings.Contains(seen, want) {
 					t.Errorf("session missing %q:\n%s", want, seen)
 				}

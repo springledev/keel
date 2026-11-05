@@ -1,6 +1,6 @@
 # Keel
 
-Small shared Go libraries for [Ballast](https://github.com/springledev/ballast), a self-hosted backup tool for homelab Docker services. Domain-free plumbing only.
+Small shared Go libraries for self-hosted Go tools: secrets, subprocesses, Docker hosts, SSH keys, Proxmox and notifications. Domain-free plumbing only.
 
 | Package | Purpose |
 |---|---|
@@ -11,7 +11,7 @@ Small shared Go libraries for [Ballast](https://github.com/springledev/ballast),
 | `proxmox` | Talks to one Proxmox VE host's REST API with an API token: lists VMs and LXCs and reads or changes the Proxmox firewall |
 | `notify` | Notification channels (ntfy, generic webhook, Discord, Slack, email) and a per-service `Notifier`; channel secrets are never logged |
 
-`secret` and `runner` were extracted unchanged (apart from import paths and comments) from Ballast's `internal/secret` and `internal/runner`. `dockerhost` was moved from Ballast's `internal/dockerhost`, and `sshkey` from the SSH branch of Ballast's `backend.RenderCredentials` (see CHANGELOG).
+See CHANGELOG for the history of each package.
 
 ## Install
 
@@ -29,7 +29,7 @@ import (
 )
 ```
 
-**Developing keel alongside Ballast:** from a Ballast checkout, run `go work init . ../keel` to build Ballast against your local copy of keel. The `go.work` file is gitignored.
+**Developing keel alongside a consumer:** from the consumer's checkout, run `go work init . ../keel` to build it against your local copy of keel. The `go.work` file is gitignored.
 
 ## Support the project
 

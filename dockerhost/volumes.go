@@ -18,7 +18,7 @@ const composeProjectLabel = "com.docker.compose.project"
 // know about it: enough to show it in a list and let an operator pick
 // it by name.
 type Volume struct {
-	// Name is the volume's name, what a service's mounts.source would
+	// Name is the volume's name, what a container's mount source would
 	// reference.
 	Name string `json:"name"`
 	// Driver is the volume driver ("local" for almost every homelab
@@ -39,7 +39,7 @@ type dockerVolumeLine struct {
 }
 
 // ListVolumes lists every Docker volume on host d, sorted by name, for
-// the volume picker in a strategy's parameter form. An error here
+// a volume picker. An error here
 // (commonly: Docker not installed, or the daemon not reachable) is the
 // caller's to report — the picker always falls back to a plain text
 // box, so listing volumes is a best-effort convenience, never a hard

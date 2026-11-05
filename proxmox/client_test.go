@@ -10,7 +10,7 @@ import (
 
 func TestClientTest(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if got := r.Header.Get("Authorization"); got != "PVEAPIToken=ballast@pve!backup=secret-123" {
+		if got := r.Header.Get("Authorization"); got != "PVEAPIToken=app@pve!mytoken=secret-123" {
 			t.Errorf("Authorization header = %q", got)
 		}
 		if r.URL.Path != "/api2/json/version" {
@@ -20,7 +20,7 @@ func TestClientTest(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	cl := &Client{Host: srv.URL, TokenID: "ballast@pve!backup", TokenSecret: "secret-123", HTTPClient: srv.Client()}
+	cl := &Client{Host: srv.URL, TokenID: "app@pve!mytoken", TokenSecret: "secret-123", HTTPClient: srv.Client()}
 	res, err := cl.Test(context.Background())
 	if err != nil {
 		t.Fatalf("Test() error: %v", err)

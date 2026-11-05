@@ -131,7 +131,7 @@ func removeScanHelper(r *runner.Runner, d Docker, helper string) error {
 // scanOneComposeDir returns, per relative sub-folder ("." for dir
 // itself), the candidate compose filenames present.
 func scanOneComposeDir(ctx context.Context, r *runner.Runner, d Docker, helperImage, dir string, children bool) (map[string][]string, error) {
-	helper := fmt.Sprintf("ballast-compose-scan-%d", scanSeq.Add(1))
+	helper := fmt.Sprintf("keel-compose-scan-%d", scanSeq.Add(1))
 	depth := "0"
 	if children {
 		depth = "1"
