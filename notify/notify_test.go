@@ -2,8 +2,12 @@ package notify
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -422,5 +426,57 @@ func TestNotifier_RegisteredChannelsSkipResolve(t *testing.T) {
 	}
 	if len(sent) != 1 {
 		t.Errorf("sent %d events, want 1", len(sent))
+	}
+}
+
+// TestWebhookExtraFields pins the body with and without Event.Extra:
+// no Extra leaves the standard body byte for byte, extra keys follow
+// in key order, standard keys cannot be overridden, and the signature
+// covers the whole body.
+func TestWebhookExtraFields(t *testing.T) {
+	ts := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	base := `{"service":"app","type":"job_failure","severity":"error","message":"m","detail":"d","timestamp":"2026-01-01T00:00:00Z"`
+	tests := []struct {
+		name  string
+		extra map[string]any
+		want  string
+	}{
+		{"no extra", nil, base + `}`},
+		{"empty extra", map[string]any{}, base + `}`},
+		{"extra keys sorted", map[string]any{"zone": "b", "attempt": 2}, base + `,"attempt":2,"zone":"b"}`},
+		{"standard keys ignored", map[string]any{"service": "other", "message": "x", "region": "eu"}, base + `,"region":"eu"}`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var body []byte
+			var sig string
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				body, _ = io.ReadAll(r.Body)
+				sig = r.Header.Get("X-Signature")
+			}))
+			defer srv.Close()
+			w := NewWebhookChannel(srv.URL)
+			w.Secret = "k"
+			ev := Event{Service: "app", Type: "job_failure", Severity: "error", Message: "m", Detail: "d", Timestamp: ts, Extra: tt.extra}
+			if err := w.Send(context.Background(), ev); err != nil {
+				t.Fatal(err)
+			}
+			if string(body) != tt.want {
+				t.Errorf("body = %s\nwant   %s", body, tt.want)
+			}
+			mac := hmac.New(sha256.New, []byte("k"))
+			mac.Write(body)
+			if want := "sha256=" + hex.EncodeToString(mac.Sum(nil)); sig != want {
+				t.Errorf("signature = %q, want %q", sig, want)
+			}
+		})
+	}
+}
+
+func TestWebhookExtraUnmarshalable(t *testing.T) {
+	w := NewWebhookChannel("http://127.0.0.1:1/")
+	err := w.Send(context.Background(), Event{Service: "app", Extra: map[string]any{"bad": make(chan int)}})
+	if err == nil || !strings.Contains(err.Error(), "marshaling webhook payload") {
+		t.Fatalf("err = %v", err)
 	}
 }

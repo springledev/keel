@@ -4,6 +4,7 @@
 
 ## v0.4.0 - 2026-11-05
 
+- `notify`: `Event.Extra` adds top-level fields to the signed webhook JSON body (after the standard fields, in key order; standard keys cannot be overridden), and `Event.Fields` adds ordered `Name: Value` lines to the email body between the Service and When lines. Both are optional; without them the webhook body and email are unchanged. Other channels ignore them.
 - Add the Apache-2.0 `LICENSE`, `SECURITY.md` and `CONTRIBUTING.md`.
 - README: list `proxmox` and `notify` in the package table.
 - Every exported name now has a doc comment, and comments, tests and docs are product-neutral.

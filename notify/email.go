@@ -156,8 +156,11 @@ func (e *EmailChannel) message(ev Event) string {
 	if e.Product != "" {
 		subject = sanitizeHeader(fmt.Sprintf("[%s] %s", e.Product, ev.Message))
 	}
-	body := fmt.Sprintf("%s\r\n\r\nService: %s\r\nWhen: %s\r\n",
-		ev.Message, ev.Service, ev.Timestamp.UTC().Format(time.RFC1123))
+	body := fmt.Sprintf("%s\r\n\r\nService: %s\r\n", ev.Message, ev.Service)
+	for _, f := range ev.Fields {
+		body += sanitizeHeader(f.Name) + ": " + sanitizeHeader(f.Value) + "\r\n"
+	}
+	body += "When: " + ev.Timestamp.UTC().Format(time.RFC1123) + "\r\n"
 	if ev.Detail != "" {
 		body += "\r\n" + strings.ReplaceAll(ev.Detail, "\n", "\r\n") + "\r\n"
 	}

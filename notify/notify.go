@@ -19,6 +19,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"time"
 )
 
@@ -48,6 +49,62 @@ type Event struct {
 	// Title, when set, is the headline channels show instead of a
 	// generated one (e.g. "Example test notification").
 	Title string
+	// Extra holds additional top-level fields for the webhook JSON
+	// body. They are added after the standard fields, in key order,
+	// and are covered by the signature. A key that names a standard
+	// field (service, type, severity, message, detail, timestamp) is
+	// ignored, so Extra can never change one. Other channels ignore
+	// Extra.
+	Extra map[string]any
+	// Fields are extra labelled facts about the event. The email body
+	// shows them in order, one "Name: Value" line each, between the
+	// Service and When lines. Other channels ignore Fields.
+	Fields []Field
+}
+
+// Field is one labelled fact in Event.Fields, e.g. {"Region", "eu"}.
+type Field struct {
+	// Name is the label shown before the colon.
+	Name string
+	// Value is the text shown after it; line breaks become spaces.
+	Value string
+}
+
+// webhookStandardKeys are the payload keys Event.Extra cannot override.
+var webhookStandardKeys = map[string]bool{
+	"service": true, "type": true, "severity": true,
+	"message": true, "detail": true, "timestamp": true,
+}
+
+// appendExtra adds extra's fields, sorted by key and skipping the
+// standard keys, to the JSON object body.
+func appendExtra(body []byte, extra map[string]any) ([]byte, error) {
+	keys := make([]string, 0, len(extra))
+	for k := range extra {
+		if !webhookStandardKeys[k] {
+			keys = append(keys, k)
+		}
+	}
+	if len(keys) == 0 {
+		return body, nil
+	}
+	sort.Strings(keys)
+	out := append([]byte(nil), body[:len(body)-1]...) // drop the closing brace
+	for _, k := range keys {
+		kb, err := json.Marshal(k)
+		if err != nil {
+			return nil, err
+		}
+		vb, err := json.Marshal(extra[k])
+		if err != nil {
+			return nil, fmt.Errorf("field %s: %w", kb, err)
+		}
+		out = append(out, ',')
+		out = append(out, kb...)
+		out = append(out, ':')
+		out = append(out, vb...)
+	}
+	return append(out, '}'), nil
 }
 
 // Channel is the interface for a notification delivery mechanism.
@@ -227,6 +284,9 @@ func (w *WebhookChannel) Send(ctx context.Context, event Event) error {
 	}
 
 	data, err := json.Marshal(payload)
+	if err == nil {
+		data, err = appendExtra(data, event.Extra)
+	}
 	if err != nil {
 		return fmt.Errorf("%s: marshaling webhook payload: %w", event.Service, err)
 	}
