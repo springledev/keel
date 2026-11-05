@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Lint fixes. **Behavior change:** four `proxmox` error messages no longer start with a capital letter: `the Proxmox API rejected the token (HTTP <n>) - ...`, `the Proxmox API request to <path> failed ...`, `the Proxmox connection <host>: no API token is configured` and `the Proxmox API token: <reason>`. Code that matches the old text (Ballast does, to add its own hint on a rejected token) must be updated when it moves to the release that includes this.
+
 ## v0.4.0 - 2026-11-05
 
 - `notify`: `Event.Extra` adds top-level fields to the signed webhook JSON body (after the standard fields, in key order; standard keys cannot be overridden), and `Event.Fields` adds ordered `Name: Value` lines to the email body between the Service and When lines. Both are optional; without them the webhook body and email are unchanged. Other channels ignore them.

@@ -30,12 +30,12 @@ func (r Resolver) Client(c Connection) (*Client, error) {
 		return nil, fmt.Errorf("no Proxmox connection is configured")
 	}
 	if c.Credential == "" {
-		return nil, fmt.Errorf("Proxmox connection %s: no API token is configured", c.Host)
+		return nil, fmt.Errorf("the Proxmox connection %s: no API token is configured", c.Host)
 	}
 	dir := runner.FindCredentialDir(c.Credential, r.CredDirs...)
 	tokenSecret, err := runner.LoadCredentialValue(dir, c.Credential)
 	if err != nil {
-		return nil, fmt.Errorf("Proxmox API token: %w", err)
+		return nil, fmt.Errorf("the Proxmox API token: %w", err)
 	}
 	r.Redact.Add(tokenSecret)
 

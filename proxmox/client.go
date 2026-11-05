@@ -79,9 +79,9 @@ func (cl *Client) do(ctx context.Context, method, path string, form url.Values, 
 	case http.StatusOK:
 		// fall through
 	case http.StatusUnauthorized, http.StatusForbidden:
-		return fmt.Errorf("Proxmox rejected the API token (HTTP %d) — check the token ID and secret, and that the token has the privileges this operation needs", resp.StatusCode)
+		return fmt.Errorf("the Proxmox API rejected the token (HTTP %d) — check the token ID and secret, and that the token has the privileges this operation needs", resp.StatusCode)
 	default:
-		return fmt.Errorf("Proxmox API request to %s failed (HTTP %d): %s", path, resp.StatusCode, strings.TrimSpace(string(respBody)))
+		return fmt.Errorf("the Proxmox API request to %s failed (HTTP %d): %s", path, resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 	if out == nil {
 		return nil

@@ -38,7 +38,7 @@ func TestClientTestUnauthorized(t *testing.T) {
 
 	cl := &Client{Host: srv.URL, TokenID: "x@pve!y", TokenSecret: "z", HTTPClient: srv.Client()}
 	_, err := cl.Test(context.Background())
-	if err == nil || !strings.Contains(err.Error(), "rejected the API token") {
+	if err == nil || !strings.Contains(err.Error(), "rejected the token") {
 		t.Fatalf("err = %v, want a rejected-token error", err)
 	}
 }
