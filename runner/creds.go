@@ -10,8 +10,8 @@ import (
 
 // FileEnv builds KEY=<dir>/<name> environment entries pointing at
 // credential files inside dir, for programs that accept credential
-// *file* paths (RESTIC_PASSWORD_FILE, AWS_SHARED_CREDENTIALS_FILE,
-// rclone's config file, ...).
+// *file* paths (CRED_PASSWORD_FILE, AWS_SHARED_CREDENTIALS_FILE,
+// a tool's own config file, ...).
 //
 // dir must be absolute — resolve it at runtime via the config package
 // ($CREDENTIALS_DIRECTORY semantics). Every file must exist,
@@ -97,13 +97,13 @@ func CheckCredentialFile(path string) error {
 // LoadCredentialValue reads the trimmed contents of a root-only
 // credential file (systemd LoadCredential= semantics via
 // $CREDENTIALS_DIRECTORY) and returns it as the secret value
-// itself — e.g. an ntfy topic URL, a webhook URL, or a catalog
-// {{ .Secrets.NAME }} value.
+// itself — e.g. an ntfy topic URL, a webhook URL, or a templated
+// secret value.
 //
 // This is the counterpart to FileEnv for callers that need the secret
 // value in memory rather than a file path in an env var: an in-process
-// HTTP client (internal/notify) or a value about to be forwarded into
-// a container's environment (internal/pipeline, for catalog secrets).
+// HTTP client or a value about to be forwarded into
+// a container's environment.
 // It reuses CheckCredentialFile so every credential-reading path
 // enforces the exact same permission rule (secrets must never leak).
 //

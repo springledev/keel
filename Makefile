@@ -1,4 +1,4 @@
-# Keel — vet, test and lint. Pure Go, no cgo (matches Ballast and Hull).
+# Keel — vet, test and lint. Pure Go, no cgo.
 
 GO ?= go
 

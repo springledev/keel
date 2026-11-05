@@ -1,5 +1,5 @@
-// Package runner executes external commands — restic, rclone, docker,
-// pg_dump — with the subprocess semantics Hull and Ballast make non-negotiable:
+// Package runner executes external commands — docker,
+// pg_dump, rsync — with the subprocess semantics that long-running programs need:
 //
 //   - Pipefail: a pipeline fails if ANY stage fails. The leftmost
 //     failure is reported as the root cause (downstream failures are
@@ -17,7 +17,7 @@
 //   - Context cancellation kills the whole pipeline and is reported as
 //     cancellation, not as a spurious "signal: killed".
 //   - On Linux, every started command is SIGKILLed if the host program itself
-//     dies, so no orphaned restic or docker process keeps working
+//     dies, so no orphaned child process keeps working
 //     after the host's run lock is released.
 package runner
 
@@ -73,8 +73,8 @@ type Command struct {
 	// AbortOn, when set, is called with each complete stderr line as
 	// the command runs. Returning true stops the whole pipeline at
 	// once and makes it fail with an *AbortError. It exists for tools
-	// that retry a failure no retry can fix (restic retries a rejected
-	// S3 key for 15 minutes) — it only ever turns a certain failure
+	// that retry a failure no retry can fix (some tools retry a rejected
+	// credential for many minutes) — it only ever turns a certain failure
 	// into an early one, never a failure into success. Lines are raw
 	// (unredacted): the predicate must not log or keep them.
 	AbortOn func(line string) bool

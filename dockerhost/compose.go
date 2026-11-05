@@ -27,11 +27,10 @@ const composeWorkingDirLabel = "com.docker.compose.project.working_dir"
 const composeServiceLabel = "com.docker.compose.service"
 
 // ComposeProject is one Docker Compose project discovered on a host,
-// for the "compose-project" catalog parameter picker and the compose
-// strategy: enough to find its config files and describe its
+// for a project picker or deployment tool: enough to find its config files and describe its
 // containers without ever reading the host filesystem directly.
 type ComposeProject struct {
-	// Name is the project name (the compose strategy's backup.compose.project).
+	// Name is the project name (the `com.docker.compose.project` label).
 	Name string `json:"name"`
 	// WorkingDir is the project's working directory, as Compose itself
 	// recorded it — where docker-compose.yml/.env live.
@@ -55,10 +54,14 @@ type ComposeProject struct {
 
 // ComposeContainer is one container belonging to a ComposeProject.
 type ComposeContainer struct {
-	Name    string            `json:"name"`
-	Service string            `json:"service"`
-	Image   string            `json:"image"`
-	Labels  map[string]string `json:"labels,omitempty"`
+	// Name is the container name
+	Name string `json:"name"`
+	// Service is the Compose service the container belongs to
+	Service string `json:"service"`
+	// Image is the image the container runs
+	Image string `json:"image"`
+	// Labels holds the container labels, as reported by Docker
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 // dockerContainerLine is one line of `docker ps -a --format

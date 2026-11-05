@@ -1,7 +1,7 @@
 // Package proxmox talks to one Proxmox VE host's REST API: callers
 // authenticate with an API token — never SSH — list the host's guests
 // (VMs and LXCs) and read or change the Proxmox firewall. Product-specific
-// orchestration (vzdump backups, drills, Hull's policy engine) lives in
+// orchestration (for example scheduled jobs) lives in
 // the consuming product and builds on Client.Do.
 package proxmox
 
@@ -30,7 +30,7 @@ type Connection struct {
 	// spellings (a bare host, or host:port).
 	Host string `json:"host"`
 	// TokenID is the API token's public half: "user@realm!tokenname",
-	// e.g. "ballast@pve!backup" or "hull@pve!firewall".
+	// e.g. "app@pve!mytoken" or "tool@pve!other".
 	TokenID string `json:"token_id"`
 	// Credential is the name of the root-only credential file holding
 	// the token's secret (a UUID Proxmox generates for the token).
@@ -46,7 +46,7 @@ type Connection struct {
 
 // DefaultCredentialName is the credential file name a connection's
 // token secret gets when saved through the named product, e.g.
-// "ballast-proxmox-token".
+// "myapp-proxmox-token".
 func DefaultCredentialName(product string) string { return product + "-proxmox-token" }
 
 // Normalize validates c and rewrites Host and TokenID into their
@@ -123,11 +123,15 @@ func RenderCredentials(c Credentials) ([]byte, []string, error) {
 
 // Guest is one VM or LXC container on the Proxmox host.
 type Guest struct {
+	// Node is the cluster node the guest runs on
 	Node string `json:"node"`
-	VMID int    `json:"vmid"`
+	// VMID is the numeric guest ID
+	VMID int `json:"vmid"`
 	// Type is "qemu" (a VM) or "lxc" (a container).
-	Type   string `json:"type"`
-	Name   string `json:"name"`
+	Type string `json:"type"`
+	// Name is the guest name
+	Name string `json:"name"`
+	// Status is the run state, such as "running"
 	Status string `json:"status"`
 }
 

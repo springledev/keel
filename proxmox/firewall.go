@@ -29,6 +29,7 @@ const (
 // Scope addresses one firewall: the datacenter, a node, a VM or a
 // container.
 type Scope struct {
+	// Kind says which level of the hierarchy this scope addresses
 	Kind ScopeKind `json:"kind"`
 	// Node is required for every kind except ScopeCluster.
 	Node string `json:"node,omitempty"`
@@ -93,11 +94,16 @@ func (s Scope) path(parts ...string) (string, error) {
 // NodeGuest is one VM or container as listed by a node's
 // /qemu or /lxc endpoint.
 type NodeGuest struct {
-	VMID     int    `json:"vmid"`
-	Name     string `json:"name"`
-	Status   string `json:"status"`
-	Tags     string `json:"tags"`
-	Template int    `json:"template"`
+	// VMID is the numeric guest ID
+	VMID int `json:"vmid"`
+	// Name is the guest name
+	Name string `json:"name"`
+	// Status is the run state, such as "running"
+	Status string `json:"status"`
+	// Tags is the semicolon-separated tag list
+	Tags string `json:"tags"`
+	// Template is 1 when the guest is a template
+	Template int `json:"template"`
 }
 
 // ListNodeGuests lists the VMs (kind ScopeQEMU) or containers (kind
@@ -120,8 +126,11 @@ func (cl *Client) ListNodeGuests(ctx context.Context, node string, kind ScopeKin
 // FirewallOptions is a firewall's options. Fields are pointers so an
 // update only sends what was set; Proxmox returns 0/1 for booleans.
 type FirewallOptions struct {
-	Enable    *int   `json:"enable,omitempty"`
-	PolicyIn  string `json:"policy_in,omitempty"`
+	// Enable is 1 when the firewall is on
+	Enable *int `json:"enable,omitempty"`
+	// PolicyIn is the default action for inbound traffic
+	PolicyIn string `json:"policy_in,omitempty"`
+	// PolicyOut is the default action for outbound traffic
 	PolicyOut string `json:"policy_out,omitempty"`
 	// Digest is the options' version token for optimistic concurrency.
 	Digest string `json:"digest,omitempty"`
@@ -165,18 +174,29 @@ type FirewallRule struct {
 	Type string `json:"type"`
 	// Action is ACCEPT, DROP, REJECT, or a security group's name for
 	// Type "group".
-	Action  string `json:"action"`
-	Enable  int    `json:"enable"`
-	Source  string `json:"source,omitempty"`
-	Dest    string `json:"dest,omitempty"`
-	Proto   string `json:"proto,omitempty"`
-	DPort   string `json:"dport,omitempty"`
-	SPort   string `json:"sport,omitempty"`
-	Iface   string `json:"iface,omitempty"`
-	Macro   string `json:"macro,omitempty"`
-	Log     string `json:"log,omitempty"`
+	Action string `json:"action"`
+	// Enable is 1 when the rule is active
+	Enable int `json:"enable"`
+	// Source is the source address, alias or IP set
+	Source string `json:"source,omitempty"`
+	// Dest is the destination address, alias or IP set
+	Dest string `json:"dest,omitempty"`
+	// Proto is the IP protocol, such as "tcp"
+	Proto string `json:"proto,omitempty"`
+	// DPort is the destination port or range
+	DPort string `json:"dport,omitempty"`
+	// SPort is the source port or range
+	SPort string `json:"sport,omitempty"`
+	// Iface limits the rule to a network interface
+	Iface string `json:"iface,omitempty"`
+	// Macro names a predefined rule macro
+	Macro string `json:"macro,omitempty"`
+	// Log is the log level for matching packets
+	Log string `json:"log,omitempty"`
+	// Comment is a free-text note
 	Comment string `json:"comment,omitempty"`
-	Digest  string `json:"digest,omitempty"`
+	// Digest is the configuration digest for change detection
+	Digest string `json:"digest,omitempty"`
 }
 
 // Form encodes r as the request body for creating or updating a rule.
@@ -242,9 +262,12 @@ func (cl *Client) DeleteFirewallRule(ctx context.Context, s Scope, pos int, dige
 
 // SecurityGroup is a named, reusable rule list defined at the cluster.
 type SecurityGroup struct {
-	Group   string `json:"group"`
+	// Group is the group name
+	Group string `json:"group"`
+	// Comment is a free-text note
 	Comment string `json:"comment,omitempty"`
-	Digest  string `json:"digest,omitempty"`
+	// Digest is the configuration digest for change detection
+	Digest string `json:"digest,omitempty"`
 }
 
 // SecurityGroups lists the cluster's security groups.
@@ -271,7 +294,9 @@ func (cl *Client) SecurityGroupRules(ctx context.Context, group string) ([]Firew
 
 // IPSet is a named set of addresses usable in rules.
 type IPSet struct {
-	Name    string `json:"name"`
+	// Name is the set name
+	Name string `json:"name"`
+	// Comment is a free-text note
 	Comment string `json:"comment,omitempty"`
 }
 
@@ -290,8 +315,11 @@ func (cl *Client) IPSets(ctx context.Context, s Scope) ([]IPSet, error) {
 
 // IPSetEntry is one address or network inside an IP set.
 type IPSetEntry struct {
-	CIDR    string `json:"cidr"`
-	NoMatch int    `json:"nomatch,omitempty"`
+	// CIDR is the address or network
+	CIDR string `json:"cidr"`
+	// NoMatch is true when the entry is an exclusion
+	NoMatch int `json:"nomatch,omitempty"`
+	// Comment is a free-text note
 	Comment string `json:"comment,omitempty"`
 }
 
@@ -310,8 +338,11 @@ func (cl *Client) IPSetEntries(ctx context.Context, s Scope, name string) ([]IPS
 
 // Alias is a named address or network usable in rules.
 type Alias struct {
-	Name    string `json:"name"`
-	CIDR    string `json:"cidr"`
+	// Name is the alias name
+	Name string `json:"name"`
+	// CIDR is the address or network the alias stands for
+	CIDR string `json:"cidr"`
+	// Comment is a free-text note
 	Comment string `json:"comment,omitempty"`
 }
 

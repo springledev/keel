@@ -1,7 +1,7 @@
 package runner
 
 // tailBuffer is an io.Writer that retains only the LAST cap bytes
-// written to it. stderr of a chatty command (restic, pg_dump) can be
+// written to it. stderr of a chatty command (a backup or dump tool) can be
 // megabytes; for diagnostics only the tail matters, so memory stays
 // bounded while the error messages at the end are preserved.
 type tailBuffer struct {

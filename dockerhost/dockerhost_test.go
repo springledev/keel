@@ -169,7 +169,7 @@ func TestDockerCommand(t *testing.T) {
 }
 
 func TestDefaultCredentialName(t *testing.T) {
-	if got := DefaultCredentialName("ballast", "nas"); got != "ballast-dockerhost.nas" {
-		t.Errorf("DefaultCredentialName = %q, want ballast-dockerhost.nas (Ballast's existing credential files must keep their names)", got)
+	if got := DefaultCredentialName("myapp", "nas"); got != "myapp-dockerhost.nas" {
+		t.Errorf("DefaultCredentialName = %q, want myapp-dockerhost.nas", got)
 	}
 }

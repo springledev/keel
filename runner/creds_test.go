@@ -24,12 +24,12 @@ func writeCred(t *testing.T, dir, name string, perm os.FileMode) string {
 
 func TestFileEnvHappyPath(t *testing.T) {
 	dir := t.TempDir()
-	writeCred(t, dir, "restic-password", 0o600)
+	writeCred(t, dir, "app-password", 0o600)
 	writeCred(t, dir, "b2-key", 0o400)
 
 	env, err := FileEnv(dir, map[string]string{
-		"RESTIC_PASSWORD_FILE": "restic-password",
-		"B2_APPLICATION_KEY":   "b2-key",
+		"CRED_PASSWORD_FILE": "app-password",
+		"B2_APPLICATION_KEY": "b2-key",
 	})
 	if err != nil {
 		t.Fatalf("FileEnv: %v", err)
@@ -37,7 +37,7 @@ func TestFileEnvHappyPath(t *testing.T) {
 	// Entries come out sorted by key, pointing at the files by path.
 	want := []string{
 		"B2_APPLICATION_KEY=" + filepath.Join(dir, "b2-key"),
-		"RESTIC_PASSWORD_FILE=" + filepath.Join(dir, "restic-password"),
+		"CRED_PASSWORD_FILE=" + filepath.Join(dir, "app-password"),
 	}
 	if !reflect.DeepEqual(env, want) {
 		t.Errorf("env = %v, want %v", env, want)
@@ -49,7 +49,7 @@ func TestFileEnvHappyPath(t *testing.T) {
 func TestFileEnvNeverReadsContents(t *testing.T) {
 	dir := t.TempDir()
 	writeCred(t, dir, "pw", 0o600)
-	env, err := FileEnv(dir, map[string]string{"RESTIC_PASSWORD_FILE": "pw"})
+	env, err := FileEnv(dir, map[string]string{"CRED_PASSWORD_FILE": "pw"})
 	if err != nil {
 		t.Fatalf("FileEnv: %v", err)
 	}
@@ -62,11 +62,11 @@ func TestFileEnvNeverReadsContents(t *testing.T) {
 
 func TestFileEnvMissingFile(t *testing.T) {
 	dir := t.TempDir()
-	_, err := FileEnv(dir, map[string]string{"RESTIC_PASSWORD_FILE": "nope"})
+	_, err := FileEnv(dir, map[string]string{"CRED_PASSWORD_FILE": "nope"})
 	if err == nil {
 		t.Fatal("missing credential file must be a loud error")
 	}
-	if !strings.Contains(err.Error(), "RESTIC_PASSWORD_FILE") {
+	if !strings.Contains(err.Error(), "CRED_PASSWORD_FILE") {
 		t.Errorf("error = %q, want the env var name for context", err)
 	}
 }
@@ -87,7 +87,7 @@ func TestFileEnvRejectsLoosePermissions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			dir := t.TempDir()
 			writeCred(t, dir, "pw", tc.perm)
-			_, err := FileEnv(dir, map[string]string{"RESTIC_PASSWORD_FILE": "pw"})
+			_, err := FileEnv(dir, map[string]string{"CRED_PASSWORD_FILE": "pw"})
 			if err == nil {
 				t.Fatalf("permissions %04o must be rejected", tc.perm)
 			}
@@ -283,7 +283,7 @@ func TestFindCredentialDir(t *testing.T) {
 		want string
 	}{
 		{"operator-provided wins", "both", []string{systemd, own}, systemd},
-		{"falls back to Ballast's own", "own-only", []string{systemd, own}, own},
+		{"falls back to the program's own", "own-only", []string{systemd, own}, own},
 		{"missing names first dir", "missing", []string{systemd, own}, systemd},
 		{"empty dirs skipped", "missing", []string{"", own}, own},
 		{"no dirs", "missing", nil, ""},

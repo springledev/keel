@@ -13,17 +13,17 @@ func TestConnectionNormalize(t *testing.T) {
 		wantTokenID string
 		wantErr     string
 	}{
-		{"bare host", Connection{Host: "192.168.1.10", TokenID: "ballast@pve!backup"}, "https://192.168.1.10:8006", "ballast@pve!backup", ""},
-		{"host with port", Connection{Host: "pve.local:8443", TokenID: "ballast@pve!backup"}, "https://pve.local:8443", "ballast@pve!backup", ""},
-		{"https url", Connection{Host: "https://pve.local:8006", TokenID: "ballast@pve!backup"}, "https://pve.local:8006", "ballast@pve!backup", ""},
-		{"trims spaces", Connection{Host: "  pve.local  ", TokenID: " ballast@pve!backup "}, "https://pve.local:8006", "ballast@pve!backup", ""},
-		{"empty host", Connection{TokenID: "ballast@pve!backup"}, "", "", "address is required"},
-		{"http scheme", Connection{Host: "http://pve.local", TokenID: "ballast@pve!backup"}, "", "", "reached over HTTPS"},
-		{"user in address", Connection{Host: "https://root@pve.local", TokenID: "ballast@pve!backup"}, "", "", "don't put a user"},
-		{"path in address", Connection{Host: "https://pve.local/api2", TokenID: "ballast@pve!backup"}, "", "", "nothing after it"},
+		{"bare host", Connection{Host: "192.168.1.10", TokenID: "app@pve!mytoken"}, "https://192.168.1.10:8006", "app@pve!mytoken", ""},
+		{"host with port", Connection{Host: "pve.local:8443", TokenID: "app@pve!mytoken"}, "https://pve.local:8443", "app@pve!mytoken", ""},
+		{"https url", Connection{Host: "https://pve.local:8006", TokenID: "app@pve!mytoken"}, "https://pve.local:8006", "app@pve!mytoken", ""},
+		{"trims spaces", Connection{Host: "  pve.local  ", TokenID: " app@pve!mytoken "}, "https://pve.local:8006", "app@pve!mytoken", ""},
+		{"empty host", Connection{TokenID: "app@pve!mytoken"}, "", "", "address is required"},
+		{"http scheme", Connection{Host: "http://pve.local", TokenID: "app@pve!mytoken"}, "", "", "reached over HTTPS"},
+		{"user in address", Connection{Host: "https://root@pve.local", TokenID: "app@pve!mytoken"}, "", "", "don't put a user"},
+		{"path in address", Connection{Host: "https://pve.local/api2", TokenID: "app@pve!mytoken"}, "", "", "nothing after it"},
 		{"empty token", Connection{Host: "pve.local"}, "", "", "token ID is required"},
 		{"bad token format", Connection{Host: "pve.local", TokenID: "not-a-token"}, "", "", "doesn't look like a Proxmox API token"},
-		{"token missing bang", Connection{Host: "pve.local", TokenID: "ballast@pve"}, "", "", "doesn't look like a Proxmox API token"},
+		{"token missing bang", Connection{Host: "pve.local", TokenID: "app@pve"}, "", "", "doesn't look like a Proxmox API token"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -85,7 +85,7 @@ func TestGuestIsLXC(t *testing.T) {
 }
 
 func TestDefaultCredentialName(t *testing.T) {
-	if got := DefaultCredentialName("hull"); got != "hull-proxmox-token" {
+	if got := DefaultCredentialName("myapp"); got != "myapp-proxmox-token" {
 		t.Errorf("got %q", got)
 	}
 }

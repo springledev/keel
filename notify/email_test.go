@@ -82,8 +82,8 @@ func TestEmailChannelSend(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			port, got := fakeSMTP(t, tt.rejectAuth)
 			e := &EmailChannel{
-				EmailSettings: EmailSettings{Host: "127.0.0.1", Port: port, Security: EmailSecurityNone, From: "ballast@example.com", To: []string{"me@example.com"}},
-				Username:      "me", Password: tt.password, Product: "Ballast",
+				EmailSettings: EmailSettings{Host: "127.0.0.1", Port: port, Security: EmailSecurityNone, From: "app@example.com", To: []string{"me@example.com"}},
+				Username:      "me", Password: tt.password, Product: "Example",
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
@@ -101,7 +101,7 @@ func TestEmailChannelSend(t *testing.T) {
 				t.Fatalf("Send: %v", err)
 			}
 			seen := <-got
-			for _, want := range []string{"MAIL FROM:<ballast@example.com>", "RCPT TO:<me@example.com>", "Subject: [Ballast] immich backup failed", "disk full"} {
+			for _, want := range []string{"MAIL FROM:<app@example.com>", "RCPT TO:<me@example.com>", "Subject: [Example] immich backup failed", "disk full"} {
 				if !strings.Contains(seen, want) {
 					t.Errorf("session missing %q:\n%s", want, seen)
 				}
@@ -145,5 +145,24 @@ func TestEmailSettingsValidate(t *testing.T) {
 				t.Fatal("want error")
 			}
 		})
+	}
+}
+
+// TestEmailFieldsOrder pins where Event.Fields appear in the body: in
+// order, between the Service and When lines, with line breaks removed.
+func TestEmailFieldsOrder(t *testing.T) {
+	e := &EmailChannel{EmailSettings: EmailSettings{From: "a@example.com", To: []string{"b@example.com"}}}
+	ts := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	ev := Event{Service: "app", Message: "m", Detail: "d", Timestamp: ts,
+		Fields: []Field{{"Region", "eu"}, {"Note", "two\nlines"}}}
+	msg := e.message(ev)
+	want := "\r\n\r\nm\r\n\r\nService: app\r\nRegion: eu\r\nNote: two lines\r\nWhen: " + ts.Format(time.RFC1123) + "\r\n\r\nd\r\n"
+	if !strings.HasSuffix(msg, want) {
+		t.Errorf("message = %q\nwant suffix %q", msg, want)
+	}
+	ev.Fields = nil
+	want = "\r\n\r\nm\r\n\r\nService: app\r\nWhen: " + ts.Format(time.RFC1123) + "\r\n\r\nd\r\n"
+	if !strings.HasSuffix(e.message(ev), want) {
+		t.Errorf("message without fields = %q", e.message(ev))
 	}
 }

@@ -4,7 +4,7 @@
 //
 // A Set is shared by pointer between every component that redacts —
 // the command runner, the pipeline, the scheduler, and the API — so a
-// secret that first appears while Ballast is already running (a
+// secret that first appears while the program is already running (a
 // repository password generated for a new destination, a notification
 // URL added after startup) is redacted everywhere the moment it is
 // added, without restarting.
@@ -52,7 +52,7 @@ func (s *Set) Add(values ...string) {
 }
 
 // AddFile records the contents of the secret file at path (surrounding
-// whitespace trimmed, as restic itself trims a --password-file). A
+// whitespace trimmed, as many tools trim a password file). A
 // missing or unreadable file adds nothing and is not an error: the
 // command that actually uses the file reports that problem loudly;
 // this only makes sure whatever that command can read is redacted.

@@ -11,9 +11,8 @@
 // keeps each host's settings in the calling program's own database and
 // credential store.
 //
-// Moved from Ballast's internal/dockerhost. Behavior changes: product
-// names are gone from messages, and DefaultCredentialName takes the
-// product prefix.
+// Product names do not appear in messages, and DefaultCredentialName takes
+// the product prefix as a parameter.
 package dockerhost
 
 import (
@@ -69,8 +68,10 @@ func (k Kind) Valid() bool {
 // or TLS client key lives in root-only credential files, referenced by
 // name (Credential) only.
 type Host struct {
+	// Name is the short name the host is known by
 	Name string `json:"name"`
-	Kind Kind   `json:"kind"`
+	// Kind says how the host is reached
+	Kind Kind `json:"kind"`
 	// Address is where the daemon is. local: empty (Docker's default
 	// socket, honouring DOCKER_HOST in the program's environment) or a
 	// unix:// socket path; remote-ssh: ssh://user@host[:port];
@@ -87,7 +88,7 @@ type Host struct {
 
 // DefaultCredentialName is the credential base name a host gets when
 // its credentials are saved through the program: product names the
-// program, e.g. "ballast" gives "ballast-dockerhost.<host>".
+// program, e.g. "myapp" gives "myapp-dockerhost.<host>".
 func DefaultCredentialName(product, host string) string {
 	return product + "-dockerhost." + host
 }
@@ -212,9 +213,11 @@ type Credentials struct {
 	SSHPrivateKey string `json:"ssh_private_key,omitempty"`
 	// CACert, ClientCert and ClientKey are a remote-tls host's PEM
 	// files (ca.pem, cert.pem, key.pem in Docker's documentation).
-	CACert     string `json:"ca_cert,omitempty"`
+	CACert string `json:"ca_cert,omitempty"`
+	// ClientCert is the PEM client certificate for TLS hosts
 	ClientCert string `json:"client_cert,omitempty"`
-	ClientKey  string `json:"client_key,omitempty"`
+	// ClientKey is the PEM private key for ClientCert
+	ClientKey string `json:"client_key,omitempty"`
 }
 
 // Empty reports whether no credential field was filled in.
@@ -228,7 +231,9 @@ var ErrNoCredentials = errors.New("no credentials given")
 // File is one credential file to write: a plain file name and its
 // contents.
 type File struct {
+	// Name is the file name inside the credentials directory
 	Name string
+	// Data is the file contents
 	Data []byte
 }
 

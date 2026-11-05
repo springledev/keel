@@ -122,7 +122,7 @@ exit 1
 			}
 			lines := strings.Split(strings.TrimSpace(string(data)), "\n")
 			last := lines[len(lines)-1]
-			if !strings.HasPrefix(last, "rm -f --volumes ballast-compose-scan-") {
+			if !strings.HasPrefix(last, "rm -f --volumes keel-compose-scan-") {
 				t.Errorf("last docker invocation = %q, want removal with --volumes", last)
 			}
 		})
